@@ -5,7 +5,6 @@ import gzip
 import os
 import struct
 
-# Download MNIST dataset from Yann LeCun's site
 def download_mnist(path="."):
     base_url = "https://github.com/golbin/TensorFlow-MNIST/raw/refs/heads/master/mnist/data/"
     files = [
@@ -26,7 +25,6 @@ def download_mnist(path="."):
         else:
             print(f"{file} already exists, skipping download.")
 
-# Load MNIST data without sklearn
 def load_mnist(path="."):
     def load_images(filename):
         with gzip.open(os.path.join(path, filename), 'rb') as f:
@@ -53,14 +51,12 @@ def load_mnist(path="."):
 
     return X_train, X_test, y_train, y_test
 
-# Activation functions
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
 def sigmoid_derivative(z):
     return sigmoid(z) * (1 - sigmoid(z))
 
-# Initialize weights and biases
 def initialize_parameters(input_size, hidden_size, output_size):
     np.random.seed(42)
     W1 = np.random.randn(hidden_size, input_size) * 0.01
@@ -69,7 +65,6 @@ def initialize_parameters(input_size, hidden_size, output_size):
     b2 = np.zeros((output_size, 1))
     return W1, b1, W2, b2
 
-# Forward propagation
 def forward_propagation(X, W1, b1, W2, b2):
     Z1 = np.dot(W1, X.T) + b1
     A1 = sigmoid(Z1)
@@ -78,13 +73,11 @@ def forward_propagation(X, W1, b1, W2, b2):
     cache = (Z1, A1, Z2, A2)
     return A2, cache
 
-# Compute loss
 def compute_loss(Y, A2):
     m = Y.shape[0]
     logprobs = -np.multiply(Y.T, np.log(A2)) - np.multiply(1 - Y.T, np.log(1 - A2))
     return np.sum(logprobs) / m
 
-# Backward propagation
 def backward_propagation(X, Y, W1, b1, W2, b2, cache):
     m = X.shape[0]
     Z1, A1, Z2, A2 = cache
@@ -99,7 +92,6 @@ def backward_propagation(X, Y, W1, b1, W2, b2, cache):
 
     return dW1, db1, dW2, db2
 
-# Update parameters
 def update_parameters(W1, b1, W2, b2, dW1, db1, dW2, db2, learning_rate):
     W1 -= learning_rate * dW1
     b1 -= learning_rate * db1
@@ -107,33 +99,21 @@ def update_parameters(W1, b1, W2, b2, dW1, db1, dW2, db2, learning_rate):
     b2 -= learning_rate * db2
     return W1, b1, W2, b2
 
-# Train the model
 def train(X_train, Y_train, X_test, Y_test, input_size, hidden_size, output_size, epochs, learning_rate):
     W1, b1, W2, b2 = initialize_parameters(input_size, hidden_size, output_size)
     
     for epoch in range(epochs):
-        # Forward propagation
         A2, cache = forward_propagation(X_train, W1, b1, W2, b2)
-
-        # Compute loss
         loss = compute_loss(Y_train, A2)
-
-        # Backward propagation
         dW1, db1, dW2, db2 = backward_propagation(X_train, Y_train, W1, b1, W2, b2, cache)
-
-        # Update parameters
         W1, b1, W2, b2 = update_parameters(W1, b1, W2, b2, dW1, db1, dW2, db2, learning_rate)
-
-        # Print loss every 10 epochs
         if epoch % 10 == 0:
             print(f"Epoch {epoch}/{epochs}, Loss: {loss:.4f}")
 
-    # Evaluate the model
     evaluate(X_test, Y_test, W1, b1, W2, b2)
 
     return W1, b1, W2, b2
 
-# Evaluate the model
 def evaluate(X, Y, W1, b1, W2, b2):
     A2, _ = forward_propagation(X, W1, b1, W2, b2)
     predictions = np.argmax(A2, axis=0)
@@ -141,7 +121,6 @@ def evaluate(X, Y, W1, b1, W2, b2):
     accuracy = np.mean(predictions == labels) * 100
     print(f"Accuracy: {accuracy:.2f}%")
 
-# Visualize some predictions
 def visualize_predictions(X, Y, W1, b1, W2, b2):
     A2, _ = forward_propagation(X, W1, b1, W2, b2)
     predictions = np.argmax(A2, axis=0)
@@ -149,9 +128,9 @@ def visualize_predictions(X, Y, W1, b1, W2, b2):
     for i in range(5):
         plt.imshow(X[i].reshape(28, 28), cmap='gray')
         plt.title(f"Prediction: {predictions[i]}, True Label: {np.argmax(Y[i])}")
+        plt.savefig(f"prediction_{i}.png")
         plt.show()
 
-# Main script
 path = "mnist_data"
 download_mnist(path)
 X_train, X_test, Y_train, Y_test = load_mnist(path)
